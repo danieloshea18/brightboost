@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				brightbots: {
+					blue: '#4AA9FF',
+					purple: '#9b87f5',
+					pink: '#FF6B9E',
+					yellow: '#FFD166',
+					green: '#62D196',
+					orange: '#FF9F66',
+					background: '#B4E7FF'
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,25 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'bounce-slight': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'bounce-slight': 'bounce-slight 2s ease-in-out infinite'
+			},
+			fontFamily: {
+				'comic': ['"Comic Neue"', 'cursive'],
+				'rounded': ['"Varela Round"', 'sans-serif']
 			}
 		}
 	},
