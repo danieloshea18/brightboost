@@ -112,7 +112,8 @@ export default {
 			},
 			fontFamily: {
 				'comic': ['"Comic Neue"', 'cursive'],
-				'rounded': ['"Varela Round"', 'sans-serif']
+				'rounded': ['"Varela Round"', 'sans-serif'],
+				'fredoka': ['Fredoka', 'sans-serif']
 			}
 		}
 	},
