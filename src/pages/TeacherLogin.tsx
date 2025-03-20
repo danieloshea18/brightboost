@@ -1,95 +1,122 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import Cloud from '@/components/Cloud';
 import { Button } from '@/components/ui/button';
 
 const TeacherLogin = () => {
   // 1. State for email/password
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // 2. handleLogin fetch call
   const handleLogin = async () => {
     try {
+      setIsLoading(true);
+      setError('');
+      
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }) ,
       });
+      
       const data = await response.json();
-
+      
       if (response.ok) {
+        // Store token in localStorage
         localStorage.setItem('authToken', data.token);
-        // If you plan to differentiate teacher vs. student, check data.user.role
-
+        
+        // Check if user is a teacher
+        if (data.user && data.user.role !== 'teacher') {
+          setError('This login is only for teachers');
+          localStorage.removeItem('authToken');
+          return;
+        }
+        
+        // Store user data
+        localStorage.setItem('userData', JSON.stringify(data.user));
+        
+        // Redirect to dashboard
         window.location.href = '/teacher/dashboard';
       } else {
-        alert(`Login failed: ${data.error}`);
+        setError(`Login failed: ${data.error}`);
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      alert('Login error. Please try again later.');
+      console.error('Login error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-brightbots-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Clouds in background */}
-      <Cloud className="top-10 left-10" />
-      <Cloud className="bottom-20 right-5" />
-      <Cloud className="top-1/2 -left-10" />
-      
-      <div className="absolute top-4 left-4">
-        <Link to="/">
-          <Button variant="ghost" className="flex items-center gap-2 text-foreground">
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </Button>
-        </Link>
-      </div>
-
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-lg relative z-10">
-        <h1 className="text-4xl font-bold text-center mb-8 text-brightbots-purple">Teacher Login</h1>
-        <p className="text-center mb-8 text-lg">Please login or create an account to continue</p>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Link to="/" className="text-primary hover:underline">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <h1 className="text-2xl font-bold">Teacher Login</h1>
+        </div>
         
-        {/* 3. Input fields for email/password */}
-        <div className="space-y-4 mb-6">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none"
-          />
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none"
-          />
-        </div>
-
-        {/* 4. Hook up handleLogin */}
-        <div className="space-y-6">
-          <Button
-            onClick={handleLogin}
-            className="w-full py-6 text-xl bg-brightbots-purple hover:bg-brightbots-purple/90"
+        {error && (
+          <div className="rounded-md bg-destructive/15 p-3 text-destructive">
+            {error}
+          </div>
+        )}
+        
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }} 
+          className="space-y-4"
+        >
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-md border p-2"
+              placeholder="Enter your email"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-md border p-2"
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </Button>
-
-          {/* 5. If you have a signup route */}
-          <Button
-            variant="outline"
-            className="w-full py-6 text-xl border-brightbots-purple text-brightbots-purple hover:bg-brightbots-purple/10"
-            as={Link}
-            to="/teacher/signup"
-          >
-            Create Account
-          </Button>
-        </div>
+          
+          <div className="text-center text-sm">
+            Don't have an account?{' '}
+            <Link to="/teacher/signup" className="text-primary hover:underline">
+              Sign up
+            </Link>
+          </div>
+        </form>
       </div>
     </div>
   );
