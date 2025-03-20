@@ -16,7 +16,7 @@ const TeacherLogin = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch('https://a056-2601-240-d200-d530-3998-9013-e55d-e978.ngrok-free.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }) ,
