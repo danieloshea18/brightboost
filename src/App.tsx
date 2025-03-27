@@ -9,6 +9,7 @@ import Index from './pages/Index';
 import Login from './pages/Login';
 import TeacherSignup from './pages/TeacherSignup';
 import StudentLogin from './pages/StudentLogin';
+import StudentSignup from './pages/StudentSignup';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import NotFound from './pages/NotFound';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/teacher/login" element={<Login />} />
         <Route path="/teacher/signup" element={<TeacherSignup />} />
         <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/student/signup" element={<StudentSignup />} />
         
         {/* Protected routes */}
         <Route 
