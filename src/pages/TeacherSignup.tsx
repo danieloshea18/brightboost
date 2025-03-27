@@ -27,10 +27,19 @@ const TeacherSignup: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log('Attempting to sign up user:', { name, email, role: 'teacher' });
       const response = await signupUser(name, email, password, 'teacher');
+      console.log('Signup successful:', response);
+      
       // Auto login after successful signup
-      login(response.token || '', response.user);
+      if (response && response.token) {
+        login(response.token, response.user);
+      } else {
+        console.error('Invalid response format:', response);
+        setError('Server returned an invalid response format');
+      }
     } catch (err: any) {
+      console.error('Signup error:', err);
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
       setIsLoading(false);

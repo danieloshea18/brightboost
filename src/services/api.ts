@@ -2,7 +2,7 @@
 import { useAuth } from '../contexts/AuthContext';
 
 // Get API URL from environment variables
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Non-authenticated API calls
 export const loginUser = async (email: string, password: string) => {
@@ -29,6 +29,8 @@ export const loginUser = async (email: string, password: string) => {
 
 export const signupUser = async (name: string, email: string, password: string, role: string) => {
   try {
+    console.log(`Sending signup request to: ${API_URL}/auth/signup`);
+    
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: 'POST',
       headers: {
@@ -38,8 +40,20 @@ export const signupUser = async (name: string, email: string, password: string, 
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Signup failed');
+      const errorText = await response.text();
+      console.error('Signup error response:', errorText);
+      
+      let errorMessage = 'Signup failed';
+      try {
+        // Try to parse as JSON if possible
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // If not JSON, use status text
+        errorMessage = `Signup failed: ${response.status} ${response.statusText}`;
+      }
+      
+      throw new Error(errorMessage);
     }
     
     return await response.json();
