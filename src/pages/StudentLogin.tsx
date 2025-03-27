@@ -1,91 +1,96 @@
+// src/pages/StudentLogin.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import Cloud from '@/components/Cloud';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '../contexts/AuthContext';
+import { loginUser } from '../services/api';
 
-const StudentLogin = () => {
-  // Store class code in component state
-  const [classCode, setClassCode] = useState('');
+const StudentLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
-  // Handler for submitting class code to the backend
-  const handleClassCodeLogin = async (e) => {
-    e.preventDefault(); // Prevent page refresh
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
     try {
-      // Make a POST request to your Node.js endpoint
-      // (Change the URL to match your actual backend route)
-      const response = await fetch('http://localhost:3000/auth/studentlogin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ classCode }), // Send the class code
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // If login is successful, store the token (if provided) in localStorage
-        if (data.token) {
-          localStorage.setItem('authToken', data.token);
-        }
-        // Redirect the student to their dashboard or any other page
-        window.location.href = '/student/dashboard';
-      } else {
-        // Show an error message if the response isn't OK
-        alert(`Login failed: ${data.error || 'Unknown error'}`);
+      const response = await loginUser(email, password);
+      // Verify this is a student account
+      if (response.user.role !== 'student') {
+        setError('This login is only for students. Please use the teacher login if you are a teacher.');
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error during student login:', error);
-      alert('Something went wrong. Please try again.');
+      login(response.token, response.user);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-brightbots-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Clouds in background */}
-      <Cloud className="top-10 right-10" />
-      <Cloud className="bottom-20 left-5" />
-      <Cloud className="top-1/2 -right-10" />
-
-      <div className="absolute top-4 left-4">
-        <Link to="/">
-          <Button variant="ghost" className="flex items-center gap-2 text-foreground">
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </Button>
-        </Link>
-      </div>
-
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-lg relative z-10">
-        <h1 className="text-4xl font-bold text-center mb-8 text-brightbots-pink">Student Login</h1>
-        <p className="text-center mb-8 text-lg">Enter your class code or scan your QR code</p>
-
-        {/* Form for entering a class code */}
-        <form onSubmit={handleClassCodeLogin} className="space-y-6">
-          <input
-            type="text"
-            placeholder="Enter Class Code"
-            value={classCode}
-            onChange={(e) => setClassCode(e.target.value)}
-            className="w-full border border-brightbots-pink rounded-lg p-4 text-xl focus:outline-none focus:ring-2 focus:ring-brightbots-pink"
-          />
-          <Button
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-6">Student Login</h1>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter your email"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          <button
             type="submit"
-            className="w-full py-6 text-xl bg-brightbots-pink hover:bg-brightbots-pink/90"
+            disabled={isLoading}
+            className={`w-full py-2 px-4 rounded-md text-white font-medium ${
+              isLoading ? 'bg-purple-400' : 'bg-purple-600 hover:bg-purple-700'
+            } transition-colors`}
           >
-            Log In with Class Code
-          </Button>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
-
-        {/* QR code button (currently no action) */}
-        <div className="mt-6">
-          <Button
-            variant="outline"
-            className="w-full py-6 text-xl border-brightbots-pink text-brightbots-pink hover:bg-brightbots-pink/10"
-            onClick={() => alert('QR code login not yet implemented!')}
-          >
-            Scan QR Code
-          </Button>
+        
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            <Link to="/" className="text-purple-600 hover:underline">
+              Back to Home
+            </Link>
+          </p>
         </div>
       </div>
     </div>
