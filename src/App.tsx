@@ -1,6 +1,7 @@
+
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Pages
@@ -21,38 +22,36 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/teacher/login" element={<Login />} />
-          <Route path="/teacher/signup" element={<TeacherSignup />} />
-          <Route path="/student/login" element={<StudentLogin />} />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/teacher/dashboard" 
-            element={
-              <ProtectedRoute 
-                element={<TeacherDashboard />} 
-                requiredRole="teacher" 
-              />
-            } 
-          />
-          <Route 
-            path="/student/dashboard" 
-            element={
-              <ProtectedRoute 
-                element={<StudentDashboard />} 
-                requiredRole="student" 
-              />
-            } 
-          />
-          
-          {/* 404 route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Index />} />
+        <Route path="/teacher/login" element={<Login />} />
+        <Route path="/teacher/signup" element={<TeacherSignup />} />
+        <Route path="/student/login" element={<StudentLogin />} />
+        
+        {/* Protected routes */}
+        <Route 
+          path="/teacher/dashboard" 
+          element={
+            <ProtectedRoute 
+              element={<TeacherDashboard />} 
+              requiredRole="teacher" 
+            />
+          } 
+        />
+        <Route 
+          path="/student/dashboard" 
+          element={
+            <ProtectedRoute 
+              element={<StudentDashboard />} 
+              requiredRole="student" 
+            />
+          } 
+        />
+        
+        {/* 404 route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </AuthProvider>
   );
 }
