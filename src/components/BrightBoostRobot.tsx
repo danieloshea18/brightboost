@@ -11,7 +11,7 @@ interface RobotProps {
 const BrightBoostRobot: React.FC<RobotProps> = ({ 
   className, 
   size = 'md',
-  animated = true 
+  animated = false  // Changed default to false
 }) => {
   const sizeClasses = {
     sm: 'w-16 h-16',

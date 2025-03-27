@@ -14,7 +14,7 @@ const NotFound: React.FC = () => {
           <h2 className="text-2xl font-semibold text-brightboost-navy mb-6">Page Not Found</h2>
           
           <div className="mb-6">
-            <BrightBoostRobot size="md" />
+            <BrightBoostRobot size="md" animated={false} />
           </div>
           
           <p className="text-brightboost-navy mb-8">
