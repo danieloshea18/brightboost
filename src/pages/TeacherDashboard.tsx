@@ -1,33 +1,34 @@
-// src/pages/TeacherDashboard.tsx
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
-interface Student {
-  id: string;
-  name: string;
-  grade: string;
-}
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Class {
   id: string;
   name: string;
   students: number;
+  schedule: string;
+}
+
+interface Assignment {
+  id: string;
+  title: string;
+  dueDate: string;
+  submissions: number;
 }
 
 const TeacherDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [students, setStudents] = useState<Student[]>([
-    { id: '1', name: 'Student 1', grade: 'A' },
-    { id: '2', name: 'Student 2', grade: 'B' },
-    { id: '3', name: 'Student 3', grade: 'C' }
-  ]);
-  const [classes, setClasses] = useState<Class[]>([
-    { id: '1', name: 'Math 101', students: 25 },
-    { id: '2', name: 'Science 202', students: 18 }
-  ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [classes, setClasses] = useState<Class[]>([
+    { id: '1', name: 'Math 101', students: 25, schedule: 'MWF 10:00 AM' },
+    { id: '2', name: 'Science 202', students: 30, schedule: 'TTh 2:00 PM' }
+  ]);
+  const [assignments, setAssignments] = useState<Assignment[]>([
+    { id: '1', title: 'Algebra Quiz', dueDate: '2025-04-10', submissions: 15 },
+    { id: '2', title: 'Science Project', dueDate: '2025-04-20', submissions: 8 }
+  ]);
 
   const handleLogout = () => {
     logout();
@@ -67,7 +68,8 @@ const TeacherDashboard: React.FC = () => {
                   {classes.map((cls) => (
                     <div key={cls.id} className="border-b pb-3">
                       <h3 className="font-medium">{cls.name}</h3>
-                      <p className="text-sm text-gray-600">{cls.students} students</p>
+                      <p className="text-sm text-gray-600">Students: {cls.students}</p>
+                      <p className="text-sm text-gray-600">Schedule: {cls.schedule}</p>
                     </div>
                   ))}
                 </div>
@@ -75,26 +77,19 @@ const TeacherDashboard: React.FC = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Students</h2>
-              {students.length === 0 ? (
-                <p className="text-gray-500">No students found.</p>
+              <h2 className="text-xl font-semibold mb-4">Assignments</h2>
+              {assignments.length === 0 ? (
+                <p className="text-gray-500">No assignments found.</p>
               ) : (
-                <table className="min-w-full">
-                  <thead>
-                    <tr>
-                      <th className="text-left pb-2">Name</th>
-                      <th className="text-left pb-2">Grade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((student) => (
-                      <tr key={student.id}>
-                        <td className="py-2">{student.name}</td>
-                        <td className="py-2">{student.grade}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="space-y-4">
+                  {assignments.map((assignment) => (
+                    <div key={assignment.id} className="border-b pb-3">
+                      <h3 className="font-medium">{assignment.title}</h3>
+                      <p className="text-sm text-gray-600">Due: {assignment.dueDate}</p>
+                      <p className="text-sm text-gray-600">Submissions: {assignment.submissions}</p>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
