@@ -6,6 +6,8 @@ import { AuthProvider } from './contexts/AuthContext';
 
 // Pages
 import Index from './pages/Index';
+import LoginSelection from './pages/LoginSelection';
+import SignupSelection from './pages/SignupSelection';
 import Login from './pages/Login';
 import TeacherSignup from './pages/TeacherSignup';
 import StudentLogin from './pages/StudentLogin';
@@ -26,6 +28,8 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Index />} />
+        <Route path="/login" element={<LoginSelection />} />
+        <Route path="/signup" element={<SignupSelection />} />
         <Route path="/teacher/login" element={<Login />} />
         <Route path="/teacher/signup" element={<TeacherSignup />} />
         <Route path="/student/login" element={<StudentLogin />} />

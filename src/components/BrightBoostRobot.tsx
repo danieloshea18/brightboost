@@ -11,27 +11,10 @@ interface RobotProps {
 const BrightBoostRobot: React.FC<RobotProps> = ({ 
   className, 
   size = 'md',
-  animated = false  // Changed default to false
+  animated = false
 }) => {
-  const sizeClasses = {
-    sm: 'w-16 h-16',
-    md: 'w-32 h-32',
-    lg: 'w-48 h-48',
-  };
-  
-  return (
-    <div className={cn(
-      sizeClasses[size],
-      animated && "animate-float",
-      className
-    )}>
-      <img 
-        src="/lovable-uploads/1b92ce32-1b02-4e77-b5f2-372220b165e0.png" 
-        alt="Bright Boost Robot" 
-        className="w-full h-full object-contain" 
-      />
-    </div>
-  );
+  // The component will be empty since we're removing the image completely
+  return null;
 };
 
 export default BrightBoostRobot;
