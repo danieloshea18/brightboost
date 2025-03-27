@@ -1,52 +1,57 @@
-
+// src/pages/Index.tsx
 import React from 'react';
-import { GraduationCap, Users } from 'lucide-react';
-import UserSelectionButton from '@/components/UserSelectionButton';
-import Cloud from '@/components/Cloud';
-import Robot from '@/components/Robot';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-const Index = () => {
+const Index: React.FC = () => {
+  const { isAuthenticated, user } = useAuth();
+
   return (
-    <div className="min-h-screen bg-brightbots-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background clouds */}
-      <Cloud className="top-10 left-10" />
-      <Cloud className="top-20 right-20" />
-      <Cloud className="bottom-10 left-1/4" />
-      <Cloud className="bottom-20 right-10" />
-      
-      {/* Logo and Title */}
-      <div className="mb-8 text-center">
-        <Robot className="mx-auto mb-4" />
-        <h1 className="text-4xl md:text-6xl font-bold mb-2 text-brightbots-purple">
-          Bright Bots
-        </h1>
-        <p className="text-xl md:text-2xl text-brightbots-blue font-rounded animate-bounce-slight">
-          Let's learn and play!
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-6">Playful Peer Platform</h1>
+        <p className="text-gray-600 text-center mb-8">
+          A platform for teachers and students to connect and learn together.
         </p>
-      </div>
-      
-      {/* User Selection Buttons */}
-      <div className="flex flex-col md:flex-row gap-6 mt-8 items-center">
-        <UserSelectionButton 
-          text="I am a Teacher" 
-          to="/teacher-login"
-          bgColor="bg-brightbots-purple"
-          icon={<GraduationCap size={32} />}
-        />
-        
-        <UserSelectionButton 
-          text="I am a Student" 
-          to="/student-login"
-          bgColor="bg-brightbots-pink"
-          icon={<Users size={32} />}
-        />
-      </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute bottom-4 w-full flex justify-center">
-        <div className="text-brightbots-green text-lg font-rounded">
-          Fun learning for K-2 students
-        </div>
+
+        {isAuthenticated ? (
+          <div className="space-y-4">
+            <p className="text-center">
+              Welcome back, <span className="font-semibold">{user?.name}</span>!
+            </p>
+            <div className="flex justify-center">
+              <Link
+                to={user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full text-center"
+              >
+                Go to Dashboard
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <Link
+                to="/teacher/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-center"
+              >
+                Teacher Login
+              </Link>
+              <Link
+                to="/teacher/signup"
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-center"
+              >
+                Teacher Signup
+              </Link>
+              <Link
+                to="/student/login"
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-center"
+              >
+                Student Login
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
