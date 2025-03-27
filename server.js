@@ -12,6 +12,19 @@ const JWT_SECRET = 'your-secret-key'; // In production, use environment variable
 app.use(cors());
 app.use(bodyParser.json());
 
+// server.js - Add proper CORS configuration
+const cors = require('cors');
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://your-production-domain.com' 
+    : 'http://localhost:5173', // Default Vite dev server port
+  credentials: true
+}) );
+
+// Use environment variables for sensitive information
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const PORT = process.env.PORT || 3000;
+
 // Mock database
 const users = [
   {
