@@ -56,3 +56,9 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+/* Fix for input text visibility in dark mode */
+input, textarea, select {
+  color-scheme: light;
+  color: #213547;
+}
