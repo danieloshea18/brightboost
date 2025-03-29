@@ -1,64 +1,57 @@
-
 // src/App.tsx
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
-// Pages
-import Index from './pages/Index';
-import LoginSelection from './pages/LoginSelection';
-import SignupSelection from './pages/SignupSelection';
+// Import pages
+import Home from './pages/Home';
 import Login from './pages/Login';
-import TeacherSignup from './pages/TeacherSignup';
-import StudentLogin from './pages/StudentLogin';
-import StudentSignup from './pages/StudentSignup';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
+import TeacherSignup from './pages/TeacherSignup';
+import StudentLogin from './pages/StudentLogin';
 import NotFound from './pages/NotFound';
-
-// Components
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Styles
+// Import styles
 import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Index />} />
-        <Route path="/login" element={<LoginSelection />} />
-        <Route path="/signup" element={<SignupSelection />} />
-        <Route path="/teacher/login" element={<Login />} />
-        <Route path="/teacher/signup" element={<TeacherSignup />} />
-        <Route path="/student/login" element={<StudentLogin />} />
-        <Route path="/student/signup" element={<StudentSignup />} />
-        
-        {/* Protected routes */}
-        <Route 
-          path="/teacher/dashboard" 
-          element={
-            <ProtectedRoute 
-              element={<TeacherDashboard />} 
-              requiredRole="teacher" 
+    <Router>
+      <AuthProvider>
+        <div className="app">
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/teacher/signup" element={<TeacherSignup />} />
+            <Route path="/student/login" element={<StudentLogin />} />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/teacher/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="teacher">
+                  <TeacherDashboard />
+                </ProtectedRoute>
+              } 
             />
-          } 
-        />
-        <Route 
-          path="/student/dashboard" 
-          element={
-            <ProtectedRoute 
-              element={<StudentDashboard />} 
-              requiredRole="student" 
+            <Route 
+              path="/student/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
             />
-          } 
-        />
-        
-        {/* 404 route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AuthProvider>
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </AuthProvider>
+    </Router>
   );
 }
 
