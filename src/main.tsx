@@ -1,18 +1,29 @@
 // src/main.tsx
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-const root = document.getElementById('root');
+// Add this for debugging
+const debugAuth = () => {
+  // Listen for localStorage changes
+  const originalSetItem = localStorage.setItem;
+  localStorage.setItem = function(key, value) {
+    const event = new Event('storageChange');
+    document.dispatchEvent(event);
+    originalSetItem.apply(this, arguments);
+    console.log(`localStorage.setItem('${key}', '${value.substring(0, 20)}${value.length > 20 ? '...' : ''}')`);
+  };
+  
+  // Log navigation attempts
+  console.log('Auth debugging enabled');
+};
 
-if (root) {
-  createRoot(root).render(
-    <React.StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </React.StrictMode>
-  );
-}
+// Enable auth debugging
+debugAuth();
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
