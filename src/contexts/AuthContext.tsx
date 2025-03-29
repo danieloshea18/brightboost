@@ -22,50 +22,64 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  
+
+  // Check if token exists in localStorage
   useEffect(() => {
-    // Check if token exists in localStorage
     const storedToken = localStorage.getItem('token');
+    
     if (storedToken) {
       // Get user data from localStorage
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       setUser(userData);
       setToken(storedToken);
     }
+    
     setIsLoading(false);
   }, []);
-  
+
   const login = (token: string, userData: User) => {
+    // Store token and user data in localStorage
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Update state
     setToken(token);
     setUser(userData);
     
-    // Redirect based on user role
+    console.log('Login successful, user role:', userData.role);
+    
+    // Redirect based on user role with a small delay to ensure state is updated
     if (userData.role === 'teacher') {
-      navigate('/teacher/dashboard');
+      console.log('Redirecting to teacher dashboard');
+      setTimeout(() => navigate('/teacher/dashboard'), 100);
     } else if (userData.role === 'student') {
-      navigate('/student/dashboard');
+      console.log('Redirecting to student dashboard');
+      setTimeout(() => navigate('/student/dashboard'), 100);
     }
   };
-  
+
   const logout = () => {
+    // Remove token and user data from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Update state
     setToken(null);
     setUser(null);
+    
+    // Redirect to home page
     navigate('/');
   };
-  
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
+      logout,
       isAuthenticated: !!token,
       isLoading
     }}>
