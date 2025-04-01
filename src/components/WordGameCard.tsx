@@ -33,7 +33,7 @@ const WordGameCard: React.FC<WordGameCardProps> = ({
         </div>
         
         <div className="mb-6 flex items-center space-x-2">
-          {word.split('').map((char, index) => (
+          {word.split('').map((_, index) => (
             <div key={index} className="w-8 h-1 bg-brightboost-navy rounded"></div>
           ))}
         </div>

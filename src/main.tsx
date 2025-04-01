@@ -1,3 +1,4 @@
+
 // src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -8,10 +9,10 @@ import './index.css';
 const debugAuth = () => {
   // Listen for localStorage changes
   const originalSetItem = localStorage.setItem;
-  localStorage.setItem = function(key, value) {
+  localStorage.setItem = function(key: string, value: string) {
     const event = new Event('storageChange');
     document.dispatchEvent(event);
-    originalSetItem.apply(this, arguments);
+    originalSetItem.call(localStorage, key, value);
     console.log(`localStorage.setItem('${key}', '${value.substring(0, 20)}${value.length > 20 ? '...' : ''}')`);
   };
   

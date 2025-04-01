@@ -1,5 +1,5 @@
-// src/components/ui/Input.tsx
-import React, { forwardRef } from 'react';
+
+import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -7,7 +7,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   error?: string;
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, type = 'text', ...props }, ref) => {
     return (
       <div className="w-full">
@@ -41,4 +41,5 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
+export { Input };
 export default Input;
