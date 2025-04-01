@@ -7,6 +7,7 @@ import RobotCharacter from '../components/RobotCharacter';
 import StemModuleCard from '../components/StemModuleCard';
 import LeaderboardCard from '../components/LeaderboardCard';
 import WordGameCard from '../components/WordGameCard';
+import BrightBoostRobot from '../components/BrightBoostRobot';
 
 const StudentDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -60,6 +61,7 @@ const StudentDashboard: React.FC = () => {
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold">Bright Boost</h1>
+              <BrightBoostRobot size="sm" />
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center gap-2 bg-brightboost-yellow px-3 py-1 rounded-full">
