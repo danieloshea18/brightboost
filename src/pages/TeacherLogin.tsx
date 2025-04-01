@@ -1,124 +1,114 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '../contexts/AuthContext';
+import { loginUser } from '../services/api';
+import GameBackground from '../components/GameBackground';
 
-const TeacherLogin = () => {
-  // 1. State for email/password
+const TeacherLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
-  // 2. handleLogin fetch call
-  const handleLogin = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await fetch('https://a056-2601-240-d200-d530-3998-9013-e55d-e978.ngrok-free.app', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }) ,
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Store token in localStorage
-        localStorage.setItem('authToken', data.token);
-        
-        // Check if user is a teacher
-        if (data.user && data.user.role !== 'teacher') {
-          setError('This login is only for teachers');
-          localStorage.removeItem('authToken');
-          return;
-        }
-        
-        // Store user data
-        localStorage.setItem('userData', JSON.stringify(data.user));
-        
-        // Redirect to dashboard
-        window.location.href = '/teacher/dashboard';
-      } else {
-        setError(`Login failed: ${data.error}`);
+      const response = await loginUser(email, password);
+      // Verify this is a teacher account
+      if (response.user.role !== 'teacher') {
+        setError('This login is only for teachers. Please use the student login if you are a student.');
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      login(response.token, response.user);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Link to="/" className="text-primary hover:underline">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <h1 className="text-2xl font-bold">Teacher Login</h1>
-        </div>
-        
-        {error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-destructive">
-            {error}
-          </div>
-        )}
-        
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleLogin();
-          }} 
-          className="space-y-4"
-        >
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border p-2"
-              placeholder="Enter your email"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border p-2"
-              placeholder="Enter your password"
-            />
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Button>
-          
-          <div className="text-center text-sm">
-            Don't have an account?{' '}
-            <Link to="/teacher/signup" className="text-primary hover:underline">
-              Sign up
+    <GameBackground>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 relative z-10">
+        <div className="game-card p-6 w-full max-w-md">
+          <div className="flex items-center gap-2 mb-4">
+            <Link to="/login" className="text-brightboost-blue hover:text-brightboost-navy">
+              <ArrowLeft className="h-5 w-5" />
             </Link>
+            <h1 className="text-2xl font-bold text-brightboost-navy">Teacher Login</h1>
           </div>
-        </form>
+          
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-brightboost-navy mb-1">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 bg-white border-2 border-brightboost-lightblue text-brightboost-navy rounded-lg focus:outline-none focus:ring-2 focus:ring-brightboost-blue focus:border-transparent transition-all"
+                placeholder="Enter your email"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-brightboost-navy mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-2 bg-white border-2 border-brightboost-lightblue text-brightboost-navy rounded-lg focus:outline-none focus:ring-2 focus:ring-brightboost-blue focus:border-transparent transition-all"
+                placeholder="Enter your password"
+              />
+            </div>
+            
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`button-shadow w-full py-3 px-4 rounded-xl text-white font-bold ${
+                isLoading ? 'bg-brightboost-blue/70' : 'bg-brightboost-blue'
+              } transition-colors`}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-brightboost-navy">
+              Don't have an account?{' '}
+              <Link to="/teacher/signup" className="text-brightboost-blue font-bold hover:underline transition-colors">
+                Sign up
+              </Link>
+            </p>
+            <p className="text-sm text-brightboost-navy mt-2">
+              <Link to="/" className="text-brightboost-blue font-bold hover:underline transition-colors">
+                Back to Home
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </GameBackground>
   );
 };
 

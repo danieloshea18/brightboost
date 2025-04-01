@@ -23,7 +23,7 @@ const Home: React.FC = () => {
               Login
             </Link>
             <Link 
-              to="/teacher/signup" 
+              to="/signup" 
               className="game-button bg-brightboost-lightblue hover:bg-brightboost-blue px-6 py-2.5 rounded-xl text-white font-bold text-base shadow-md transition-all"
             >
               Signup
