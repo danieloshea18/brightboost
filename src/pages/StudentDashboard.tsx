@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GameBackground from '../components/GameBackground';
-import BrightBoostRobot from '../components/BrightBoostRobot';
 import RobotCharacter from '../components/RobotCharacter';
 import StemModuleCard from '../components/StemModuleCard';
 import LeaderboardCard from '../components/LeaderboardCard';
