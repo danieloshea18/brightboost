@@ -83,8 +83,8 @@ const StudentDashboard: React.FC = () => {
               <p className="text-brightboost-navy">Let's learn and have fun!</p>
             </div>
             <div className="flex gap-2">
-              <div className="badge bg-brightboost-blue text-white">XP: 120/200</div>
-              <div className="badge bg-brightboost-yellow text-brightboost-navy">Stars: 25</div>
+              <div className="badge bg-brightboost-blue text-white px-2 py-1 rounded-full text-xs">XP: 120/200</div>
+              <div className="badge bg-brightboost-yellow text-brightboost-navy px-2 py-1 rounded-full text-xs">Stars: 25</div>
             </div>
           </div>
           

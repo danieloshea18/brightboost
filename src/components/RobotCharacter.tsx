@@ -29,10 +29,10 @@ const RobotCharacter: React.FC<RobotCharacterProps> = ({
     helper: {
       primary: '#8BD2ED', // brightboost-lightblue
       secondary: '#46B1E6', // brightboost-blue
-      accent: '#FF9C81' // brightboost-yellow (fixed from typo)
+      accent: '#FF9C81' // brightboost-coral
     },
     friend: {
-      primary: '#FF9C81', // brightboost-yellow (fixed from typo)
+      primary: '#FF9C81', // brightboost-coral
       secondary: '#8BD2ED', // brightboost-lightblue
       accent: '#46B1E6' // brightboost-blue
     }
