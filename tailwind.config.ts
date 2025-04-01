@@ -1,4 +1,3 @@
-
 // tailwind.config.ts
 import type { Config } from 'tailwindcss';
 
@@ -18,7 +17,7 @@ const config: Config = {
           navy: '#1C3D6C',
           blue: '#46B1E6',
           lightblue: '#8BD2ED',
-          yellow: '#FP9C819',
+          yellow: '#FF9C81',
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

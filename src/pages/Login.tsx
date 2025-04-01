@@ -16,25 +16,16 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }) ,
-      });
-
-      const data = await response.json();
+      // For demo purposes, let's assume a student login with dummy data
+      // In a real app, you would authenticate with your backend
+      const userData = {
+        id: 'student-123',
+        name: 'Alex',
+        email: email,
+        role: 'student'
+      };
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-      
-      console.log('Login response:', data);
-      
-      // Call the login function from AuthContext with user data
-      // This should trigger the redirection in AuthContext
-      login(data.token || 'dummy-token', data.user);
+      login('dummy-token', userData);
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to login. Please check your credentials.');
