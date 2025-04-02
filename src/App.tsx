@@ -15,6 +15,7 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginSelection from './pages/LoginSelection';
 import SignupSelection from './pages/SignupSelection';
+import Index from './pages/Index';
 
 // Import styles
 import './App.css';
@@ -26,7 +27,7 @@ function App() {
         <div className="app">
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<LoginSelection />} />
             <Route path="/signup" element={<SignupSelection />} />
             <Route path="/teacher/login" element={<TeacherLogin />} />
