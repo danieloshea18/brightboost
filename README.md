@@ -8,7 +8,7 @@ BrightBoost is an interactive learning platform designed to help teachers create
 *   **Student Accounts & Dashboard:** Students can sign up, log in, and access assigned lessons and activities.
 *   **Lesson Creation & Management:** Teachers can create, edit, and delete lessons, including title, content, category, and status.
 *   **Student Lesson Viewing & Activity Tracking:** Students can view lessons assigned to them and mark activities as complete.
-*   **Persistent Data Storage:** User and lesson data is stored persistently using a file-based database (`lowdb`).
+*   **Persistent Data Storage:** User and lesson data is stored persistently using Azure PostgreSQL database.
 *   **Role-Based Access Control:** Clear distinction between teacher and student functionalities.
 *   **E2E Tested Core Flow:** The primary user journeys for teachers and students have been tested.
 
@@ -37,8 +37,8 @@ This project is built with a modern web technology stack:
     *   React Router (for navigation)
     *   Context API (for state management, e.g., AuthContext)
 *   **Backend:**
-    *   Node.js with Express.js
-    *   `lowdb` (for file-based JSON database - `db.json`)
+    *   Azure Functions
+    *   Prisma ORM with Azure PostgreSQL
     *   JSON Web Tokens (JWT) for authentication
     *   `bcryptjs` for password hashing
 *   **Testing:**
@@ -71,36 +71,28 @@ To get a local copy up and running, follow these simple steps.
     ```
 
 3.  **Configure Environment Variables:**
-    The backend server (`server.cjs`) uses a `.env` file for configuration (e.g., `JWT_SECRET`). Create a `.env` file in the root of the project if it doesn't exist:
+    The Azure Functions backend uses a `.env` file for configuration. Create a `.env` file in the root of the project if it doesn't exist:
     ```env
     JWT_SECRET=your_super_secret_jwt_key_here
-    # PORT=3001 (Optional, defaults to 3000 or 3001 if not set)
+    POSTGRES_URL=postgres://username:password@your-server.postgres.database.azure.com:5432/brightboost
     ```
-    Replace `your_super_secret_jwt_key_here` with a strong, unique secret.
+    Replace `your_super_secret_jwt_key_here` with a strong, unique secret and update the PostgreSQL connection string.
 
-4.  **Running the Application (Full Stack):**
-    To run both the frontend Vite development server and the backend Node.js server concurrently:
-    ```sh
-    npm run dev:full
-    ```
-    This command typically starts:
-    *   Frontend (Vite): `http://localhost:5173` (or another port if 5173 is busy)
-    *   Backend Server: `http://localhost:3000` (or the port specified in `.env`/default)
-
-5.  **Running Frontend Only:**
+4.  **Running the Application:**
+    To run the frontend Vite development server:
     ```sh
     npm run dev
     ```
+    This command starts:
+    *   Frontend (Vite): `http://localhost:5173` (or another port if 5173 is busy)
 
-6.  **Running Backend Server Only:**
-    For development with auto-reloading (using `nodemon`):
+5.  **Running Azure Functions Locally:**
+    To run Azure Functions locally:
     ```sh
-    npm run dev:server
+    cd api
+    func start
     ```
-    Or to run the plain Node.js server (e.g., for production testing):
-    ```sh
-    npm run server
-    ```
+    This will start the Azure Functions runtime locally.
 
 ## Deployment
 
@@ -117,11 +109,11 @@ The deployment pipeline typically:
 2. Creates a Docker image and pushes it to a container registry (e.g., GitHub Container Registry or Azure Container Registry).
 3. Deploys the application to Azure App Service.
 
-**Note on `db.json` for Azure Deployment:**
-The current backend uses `lowdb` with a `db.json` file for data persistence. When deploying to Azure App Service:
-*   Ensure `db.json` is included in your deployment package if you want to deploy pre-existing data (not recommended for secrets or dynamic data).
-*   By default, Azure App Service file storage is ephemeral for scaling events or instance restarts (unless using features like "Path mappings" with Azure Storage or Web App for Containers with persistent storage).
-*   For a production-like or more robust demo environment on Azure, consider using an Azure database service (e.g., Azure Cosmos DB, Azure Database for PostgreSQL/MySQL) instead of `db.json`. However, for the current scope, `db.json` will be used and its persistence characteristics on App Service should be noted. The `AZURE_DEPLOYMENT.MD` file should contain more details or considerations for this.
+**Note on Azure PostgreSQL for Deployment:**
+The backend uses Azure PostgreSQL for data persistence. When deploying to Azure:
+*   Ensure the `POSTGRES_URL` environment variable is properly configured in your Azure Function App settings.
+*   Database migrations should be run using the provided scripts in the `scripts/` directory.
+*   For more details on the deployment process, refer to the `AZURE_DEPLOYMENT.MD` file.
 
 ## Project Structure (Simplified)
 
@@ -136,16 +128,21 @@ The current backend uses `lowdb` with a `db.json` file for data persistence. Whe
 │   ├── services/       # API service integration
 │   ├── App.tsx         # Main application component
 │   └── main.tsx        # Entry point for the React app
+├── api/                # Azure Functions backend
+│   ├── auth/           # Authentication functions (login, signup)
+│   ├── shared/         # Shared utilities and middleware
+│   └── README.md       # Azure Functions documentation
+├── prisma/             # Prisma ORM schema and migrations
+│   ├── schema.prisma   # Database schema definition
+│   └── migrations/     # Database migrations
+├── scripts/            # Deployment and utility scripts
 ├── cypress/            # Cypress E2E tests
-├── server.cjs          # Backend Express server (Node.js, CommonJS)
-├── db.json             # lowdb JSON database file (gitignored by default, ensure handling for deployment)
 ├── vite.config.ts      # Vite configuration
 ├── tailwind.config.js  # Tailwind CSS configuration
 ├── postcss.config.js   # PostCSS configuration
 ├── README.md           # This file
 └── package.json        # Project dependencies and scripts
 ```
-*Note: `db.json` should ideally be in `.gitignore` if it contains sensitive or frequently changing data not meant for version control. If it's meant to be deployed with initial schema/data, ensure it's not gitignored.*
 
 ## How can I edit this code? (Legacy Lovable Info)
 
@@ -168,5 +165,38 @@ Standard GitHub workflows are always available.
 ## I want to use a custom domain - is that possible? (Legacy Lovable Info)
 
 Lovable's specific advice was: "We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)"
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+- Azure Functions (backend)
+- Prisma ORM
+- Azure PostgreSQL
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/f303f677-9491-4ea6-843e-bc69a8fc78d2) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
 
 For deployments to Azure (as configured for this project), custom domains can be configured directly within Azure App Service.

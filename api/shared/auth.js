@@ -1,58 +1,50 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
+const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-const users = [
-  {
-    id: '1',
-    name: 'Test Teacher',
-    email: 'teacher@example.com',
-    password: 'password123',
-    role: 'teacher'
-  },
-  {
-    id: '2',
-    name: 'Test Student',
-    email: 'student@example.com',
-    password: 'password123',
-    role: 'student'
+function verifyToken(req) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.replace('Bearer ', '');
+  
+  if (!token) {
+    return null;
   }
-];
-
-const verifyToken = (token) => {
+  
   try {
-    if (!token) {
-      throw new Error('No token provided');
-    }
-    
-    if (token.startsWith('Bearer ')) {
-      token = token.slice(7);
-    }
-    
     const decoded = jwt.verify(token, JWT_SECRET);
     return decoded;
   } catch (error) {
-    throw new Error('Invalid token');
+    return null;
   }
-};
+}
 
-const findUserByCredentials = (email, password) => {
-  return users.find(user => user.email === email && user.password === password);
-};
-
-const findUserByEmail = (email) => {
-  return users.find(user => user.email === email);
-};
-
-const addUser = (user) => {
-  users.push(user);
-  return user;
-};
+function authMiddleware(context, req, role = null) {
+  const user = verifyToken(req);
+  
+  if (!user) {
+    context.res = {
+      status: 401,
+      body: { error: 'Authentication required' }
+    };
+    return false;
+  }
+  
+  if (role && user.role !== role) {
+    context.res = {
+      status: 403,
+      body: { error: 'Access denied' }
+    };
+    return false;
+  }
+  
+  req.user = user;
+  return true;
+}
 
 module.exports = {
   verifyToken,
-  findUserByCredentials,
-  findUserByEmail,
-  addUser,
-  users
+  authMiddleware
 };
