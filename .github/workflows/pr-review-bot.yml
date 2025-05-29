@@ -266,7 +266,7 @@ jobs:
 
             // Linting
             commentBody += `### 🧹 Linting
-`;
+
             if (lintStatus === 'success') {
               commentBody += `✅ Linting passed.
 `;
