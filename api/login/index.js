@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const prisma = require('../../prisma/client');
+const prisma = require('../../prisma/client.cjs');
 const { generateToken } = require('../shared/auth');
 
 module.exports = async function (context, req) {
@@ -18,12 +18,10 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email }
     });
     
-    // Check if user exists
     if (!user) {
       context.res = {
         status: 401,
@@ -36,7 +34,6 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       context.res = {
@@ -50,10 +47,8 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Generate JWT token
     const token = generateToken(user);
     
-    // Return success response with token and user data (excluding password)
     context.res = {
       headers: { "Content-Type": "application/json" },
       body: {
@@ -77,7 +72,9 @@ module.exports = async function (context, req) {
       headers: { "Content-Type": "application/json" },
       body: { 
         success: false, 
-        error: "An unexpected error occurred during login. Please try again." 
+        error: process.env.NODE_ENV === 'production' 
+          ? "An unexpected error occurred during login. Please try again." 
+          : `Error: ${error.message}\nStack: ${error.stack}\nPOSTGRES_URL: ${process.env.POSTGRES_URL ? 'Set' : 'Not set'}\nJWT_SECRET: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`
       }
     };
   }

@@ -1,9 +1,8 @@
-const prisma = require('../../prisma/client');
+const prisma = require('../../prisma/client.cjs');
 const { verifyToken } = require('../shared/auth');
 
 module.exports = async function (context, req) {
   try {
-    // Verify JWT token
     const authResult = await verifyToken(context, req);
     
     if (!authResult.isAuthorized) {
@@ -18,7 +17,6 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Check if user is a student
     if (authResult.user.role !== 'student') {
       context.res = {
         status: 403,
@@ -31,7 +29,6 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Get student's enrolled lessons
     const enrolledLessons = await prisma.enrollment.findMany({
       where: { studentId: authResult.user.id },
       include: {
@@ -42,7 +39,6 @@ module.exports = async function (context, req) {
       }
     });
     
-    // Format enrolled lessons
     const formattedLessons = enrolledLessons.map(enrollment => {
       const totalActivities = enrollment.activities.length;
       const completedActivities = enrollment.activities.filter(a => a.completed).length;
@@ -59,13 +55,11 @@ module.exports = async function (context, req) {
       };
     });
     
-    // Get student's activities
     const activities = await prisma.activity.findMany({
       where: { studentId: authResult.user.id },
       include: { lesson: true }
     });
     
-    // Format activities
     const formattedActivities = activities.map(activity => ({
       id: activity.id,
       title: activity.title || activity.lesson.title,

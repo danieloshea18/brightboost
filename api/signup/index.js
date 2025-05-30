@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const prisma = require('../../prisma/client');
+const prisma = require('../../prisma/client.cjs');
 const { generateToken } = require('../shared/auth');
 
 module.exports = async function (context, req) {
@@ -18,7 +18,6 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -35,11 +34,9 @@ module.exports = async function (context, req) {
       return;
     }
     
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
-    // Create new user
     const newUser = await prisma.user.create({
       data: {
         name,
@@ -52,10 +49,8 @@ module.exports = async function (context, req) {
       }
     });
     
-    // Generate JWT token
     const token = generateToken(newUser);
     
-    // Return success response with token and user data (excluding password)
     context.res = {
       headers: { "Content-Type": "application/json" },
       body: {
