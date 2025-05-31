@@ -1,38 +1,13 @@
-const prisma = require('../../prisma/client.cjs');
+// dbtest/index.js
 
-module.exports = async function (context, req) {
+import prisma from '../../prisma/client.cjs'; // Adjust path
+
+export default async function handler(req, res) {
   try {
-    const result = await prisma.$queryRaw`SELECT 1 as test`;
-    
-    context.res = {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: {
-        success: true,
-        message: "Database connection successful",
-        env: {
-          nodeEnv: process.env.NODE_ENV,
-          postgresUrl: process.env.POSTGRES_URL ? "Set (redacted)" : "Not set",
-          jwtSecret: process.env.JWT_SECRET ? "Set (redacted)" : "Not set"
-        },
-        result: result
-      }
-    };
+    // Example: Fetch all users using Prisma (not raw SQL)
+    const users = await prisma.user.findMany();
+    res.status(200).json({ users });
   } catch (error) {
-    context.res = {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-      body: {
-        success: false,
-        message: "Database connection failed",
-        error: error.message,
-        stack: error.stack,
-        env: {
-          nodeEnv: process.env.NODE_ENV,
-          postgresUrl: process.env.POSTGRES_URL ? "Set (redacted)" : "Not set",
-          jwtSecret: process.env.JWT_SECRET ? "Set (redacted)" : "Not set"
-        }
-      }
-    };
+    res.status(500).json({ error: 'Database test failed.' });
   }
-};
+}
