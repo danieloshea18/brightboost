@@ -269,7 +269,7 @@ jobs:
 
             if (lintStatus === 'success') {
               commentBody += `✅ Linting passed.
-`;
+
               // Show details if output is not empty and not a generic success message (adjust as needed)
               if (lintOutput && lintOutput.trim() !== '' && lintOutput.trim() !== 'No linting issues found.' && !lintOutput.trim().startsWith('All files passed linting')) {
                 commentBody += `<details><summary>Details</summary>
