@@ -1,81 +1,44 @@
-const bcrypt = require('bcryptjs');
-const prisma = require('../../prisma/client.cjs');
-const { generateToken } = require('../shared/auth');
+// api/login/index.js
 
-module.exports = async function (context, req) {
-  try {
-    const { email, password } = req.body || {};
-    
-    if (!email || !password) {
-      context.res = {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-        body: { 
-          success: false, 
-          error: "Missing required fields. Please provide email and password." 
-        }
-      };
-      return;
-    }
-    
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
-    
-    if (!user) {
-      context.res = {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-        body: { 
-          success: false, 
-          error: "Invalid email or password." 
-        }
-      };
-      return;
-    }
-    
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      context.res = {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-        body: { 
-          success: false, 
-          error: "Invalid email or password." 
-        }
-      };
-      return;
-    }
-    
-    const token = generateToken(user);
-    
-    context.res = {
-      headers: { "Content-Type": "application/json" },
-      body: {
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          xp: user.xp,
-          level: user.level,
-          streak: user.streak
-        }
-      }
-    };
-  } catch (error) {
-    context.log.error("Error in login function:", error);
-    context.res = {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-      body: { 
-        success: false, 
-        error: process.env.NODE_ENV === 'production' 
-          ? "An unexpected error occurred during login. Please try again." 
-          : `Error: ${error.message}\nStack: ${error.stack}\nPOSTGRES_URL: ${process.env.POSTGRES_URL ? 'Set' : 'Not set'}\nJWT_SECRET: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`
-      }
-    };
+import prisma from '../../../prisma/client.cjs';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
-};
+
+  try {
+    const validated = loginSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({
+      where: { email: validated.email },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Compare password (assume hashed, use bcrypt)
+    const bcrypt = await import('bcryptjs');
+    const valid = await bcrypt.compare(validated.password, user.password);
+
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // TODO: generate and return JWT/session as appropriate
+
+    // Never include sensitive data in error or success responses
+    const { password, ...userSafe } = user;
+    res.status(200).json({ user: userSafe });
+  } catch (error) {
+    // Only generic error message to avoid leaking details
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
