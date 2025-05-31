@@ -87,6 +87,3 @@ const TeacherDashboard = () => {
 };
 
 export default TeacherDashboard;
-
-
-export default TeacherDashboard;
