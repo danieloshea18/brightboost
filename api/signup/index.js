@@ -13,7 +13,7 @@ const signupSchema = z.object({
 });
 
 module.exports = async function (context, req) {
-  context.log('Signup function triggered - comprehensive diagnostic');
+  context.log('Signup function triggered with full dependencies');
   
   try {
     context.log('Environment check:', {
