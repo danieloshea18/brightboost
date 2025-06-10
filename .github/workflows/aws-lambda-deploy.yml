@@ -1,14 +1,16 @@
-name: Deploy Teacher Signup API
+name: Deploy Lambda Backend to AWS
 
 on:
   push:
-    branches: [feat/teacher-signup-mvp]
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   AWS_REGION: us-east-1
@@ -16,6 +18,7 @@ env:
 
 jobs:
   deploy:
+    name: Deploy Lambda backend to AWS
     runs-on: ubuntu-latest
     
     steps:

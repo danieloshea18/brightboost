@@ -25,9 +25,7 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          npm ci
-          cd src/lambda && npm ci
+        run: npm ci
       
       - name: Lint code
         run: npm run lint
@@ -48,7 +46,12 @@ jobs:
         run: npx wait-on --timeout=60000 http://localhost:5173 || (cat vite.log && exit 1)
       
       - name: Run Cypress smoke tests
-        run: npx cypress run --spec "cypress/e2e/smoke.cy.ts"
+        run: npx cypress run --spec "cypress/e2e/smoke.cy.ts" --env IS_PREVIEW=false
+        if: github.event_name != 'pull_request'
+      
+      - name: Run Cypress smoke tests (Preview Mode)
+        run: npx cypress run --spec "cypress/e2e/smoke.cy.ts" --env IS_PREVIEW=true
+        if: github.event_name == 'pull_request'
       
       - name: Build application
         run: npm run build
@@ -88,9 +91,7 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: |
-          npm ci
-          cd src/lambda && npm ci
+        run: npm ci
       
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
@@ -183,3 +184,11 @@ jobs:
                 "slotSetting": false
               }
             ]
+      
+      # DEPRECATED: AWS Lambda deployment removed - backend migrated to AWS Lambda
+      # - name: Deploy Azure Function App
+      #   uses: azure/functions-action@v1
+      #   with:
+      #     app-name: 'bb-dev-func-node'
+      #     package: 'api'
+      #     publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE_NODE }}
