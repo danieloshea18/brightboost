@@ -1,9 +1,8 @@
 {
   "routes": [
     {
-      "route": "/api/*",
-      "allowedRoles": ["anonymous"],
-      "serve": "https://bb-dev-func-api.azurewebsites.net/api/{*}"
+      "route": "/api/signup/teacher",
+      "allowedRoles": ["anonymous"]
     },
     {
       "route": "/*",
