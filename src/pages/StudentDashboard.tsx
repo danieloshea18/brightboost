@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useApi } from '../services/api'; // Import useApi
+import { useApi } from '../services/api';
 import GameBackground from '../components/GameBackground';
 import RobotCharacter from '../components/RobotCharacter';
-// import StemModuleCard, { ActivityProps as StemActivityDisplayProps } from '../components/StemModuleCard'; // Not used for activities currently
-import WordGameCard from '../components/WordGameCard'; // Assuming this is a static or separate feature
+import WordGameCard from '../components/WordGameCard';
 import BrightBoostRobot from '../components/BrightBoostRobot';
-import { Button } from '@/components/ui/button'; // For "Mark Complete"
+import { Button } from '@/components/ui/button';
 
 // Define types for fetched data (mirroring backend structure)
 interface Lesson {
@@ -131,9 +130,11 @@ const StudentDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <GameBackground>
-        <div className="min-h-screen flex flex-col relative z-10 items-center justify-center">
-          <BrightBoostRobot size="lg" />
-          <p className="text-xl text-brightboost-navy mt-4">Loading your dashboard...</p>
+        <div className="min-h-screen flex items-center justify-center">
+          <div data-testid="loading-spinner" className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brightboost-blue mx-auto mb-4"></div>
+            <p className="text-brightboost-navy">Loading your dashboard...</p>
+          </div>
         </div>
       </GameBackground>
     );
@@ -142,16 +143,22 @@ const StudentDashboard: React.FC = () => {
   if (error) {
     return (
       <GameBackground>
-        <div className="min-h-screen flex flex-col relative z-10 items-center justify-center p-4">
-          <BrightBoostRobot size="lg" />
-          <p className="text-xl text-red-500 mt-4 text-center">Error: {error}</p>
-          {error.includes('preview mode') && (
-            <div className="mt-4 p-4 bg-yellow-100 rounded-lg">
-              <p className="text-sm text-yellow-800">API not available in preview mode</p>
-              <p className="text-sm text-yellow-800">Student data will be shown in production</p>
-            </div>
-          )}
-          <Button onClick={() => navigate('/')} className="mt-4">Go Home</Button>
+        <div className="min-h-screen flex items-center justify-center">
+          <div data-testid="dashboard-error" className="text-center">
+            <p className="text-red-600 mb-4">Oops! {error}</p>
+            {error.includes('preview mode') && (
+              <div className="mt-4 p-4 bg-yellow-100 rounded-lg">
+                <p className="text-sm text-yellow-800">API not available in preview mode</p>
+                <p className="text-sm text-yellow-800">Student data will be shown in production</p>
+              </div>
+            )}
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-brightboost-blue text-white px-4 py-2 rounded-lg hover:bg-brightboost-blue/80"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </GameBackground>
     );
@@ -160,7 +167,7 @@ const StudentDashboard: React.FC = () => {
   return (
     <GameBackground>
       <div className="min-h-screen flex flex-col relative z-10">
-        <nav className="bg-brightboost-lightblue text-brightboost-navy p-4 shadow-md">
+        <nav data-testid="student-dashboard-nav" className="bg-brightboost-lightblue text-brightboost-navy p-4 shadow-md">
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold">Bright Boost</h1>
@@ -186,6 +193,11 @@ const StudentDashboard: React.FC = () => {
             <div>
               <h2 className="text-2xl font-bold text-brightboost-navy">Hello, {studentName}!</h2>
               <p className="text-brightboost-navy">Let's learn and have fun!</p>
+              {enrolledLessons.length > 0 && (
+                <p className="text-sm text-brightboost-navy mt-2">
+                  You have {enrolledLessons.length} lesson{enrolledLessons.length !== 1 ? 's' : ''} available
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <div className="badge bg-brightboost-blue text-white px-2 py-1 rounded-full text-xs">XP: {user?.xp || 0}/200</div>
@@ -228,7 +240,7 @@ const StudentDashboard: React.FC = () => {
                     {activity.completed ? (
                       <p className="text-green-600 font-semibold">Completed!</p>
                     ) : (
-                      <Button className="mt-2 w-full" size="sm" onClick={() => handleMarkActivityComplete(activity.id)}>
+                      <Button className="mt-2 w-full text-sm" onClick={() => handleMarkActivityComplete(activity.id)}>
                         Mark as Complete
                       </Button>
                     )}
