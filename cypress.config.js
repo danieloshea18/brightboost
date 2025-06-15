@@ -2,7 +2,8 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: "http://localhost:5173",
+    // Dynamically set baseUrl via env var, fallback to localhost for dev
+    baseUrl: process.env.CYPRESS_BASE_URL || "http://localhost:5173",
     supportFile: "cypress/support/index.js",
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     video: false,
