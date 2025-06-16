@@ -48,5 +48,59 @@ describe("Dashboard API Smoke Tests", () => {
     });
   });
 
+  it('allows new students to create accounts', () => {
+    cy.intercept('POST', '**/api/signup/student').as('studentSignup');
+    
+    const timestamp = Date.now();
+    const uniqueEmail = `cypress_test_${timestamp}@brightboost.io`;
+    
+    cy.visit('/student/signup');
+    cy.get('#name').type('Test Student');
+    cy.get('#email').type(uniqueEmail);
+    cy.get('#password').type('Pa$$w0rd!');
+    cy.get('#confirmPassword').type('Pa$$w0rd!');
+    cy.get('button[type="submit"]').click();
+    
+    cy.wait('@studentSignup').then((interception) => {
+      if (interception.response) {
+        expect(interception.response.statusCode).to.equal(201);
+        expect(interception.response.body).to.have.property('token');
+        expect(interception.response.body.user).to.have.property('role', 'STUDENT');
+      }
+    });
+    
+    cy.url().should('include', '/student');
+  });
 
+  it('prevents duplicate student email registration', () => {
+    cy.intercept('POST', '**/api/signup/student').as('duplicateSignup');
+    
+    cy.visit('/student/signup');
+    cy.get('#name').type('Duplicate Test');
+    cy.get('#email').type('cypress_test@brightboost.io');
+    cy.get('#password').type('Pa$$w0rd!');
+    cy.get('#confirmPassword').type('Pa$$w0rd!');
+    cy.get('button[type="submit"]').click();
+    
+    cy.wait('@duplicateSignup').then((interception) => {
+      if (interception.response) {
+        expect(interception.response.statusCode).to.equal(409);
+      }
+    });
+  });
+
+  it('rejects login with wrong password', () => {
+    cy.intercept('POST', '**/api/login').as('badLogin');
+    
+    cy.visit('/student/login');
+    cy.get('#email').type('cypress_test@brightboost.io');
+    cy.get('#password').type('WrongPassword!');
+    cy.get('button[type="submit"]').click();
+    
+    cy.wait('@badLogin').then((interception) => {
+      if (interception.response) {
+        expect(interception.response.statusCode).to.equal(401);
+      }
+    });
+  });
 });
