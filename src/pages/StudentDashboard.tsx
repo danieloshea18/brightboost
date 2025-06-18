@@ -152,7 +152,7 @@ const StudentDashboard = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center gap-2 bg-brightboost-yellow px-3 py-1 rounded-full">
                 <span className="text-sm font-bold">
-                  Level {user?.level || "Explorer"}
+                  Level Explorer
                 </span>
                 <span className="text-xs bg-white px-2 py-0.5 rounded-full">
                   {user?.name || "Student"}
