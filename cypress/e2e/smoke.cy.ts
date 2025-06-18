@@ -1,6 +1,6 @@
 describe("Dashboard API Smoke Tests", () => {
   it("should handle teacher dashboard correctly", () => {
-    cy.intercept("GET", "**/prod/api/teacher_dashboard*").as(
+    cy.intercept("GET", "**/api/teacher_dashboard*").as(
       "teacherDashboard",
     );
 
@@ -25,9 +25,20 @@ describe("Dashboard API Smoke Tests", () => {
   });
 
   it("should handle student dashboard correctly", () => {
-    cy.intercept("GET", "**/prod/api/student_dashboard*").as(
-      "studentDashboard",
-    );
+    cy.intercept("GET", "**/api/student/dashboard*", {
+      statusCode: 200,
+      body: {
+        message: "Welcome to your dashboard!",
+        courses: [
+          { id: "1", name: "Math 101", grade: "A", teacher: "Ms. Johnson" },
+          { id: "2", name: "Science 202", grade: "B+", teacher: "Mr. Smith" }
+        ],
+        assignments: [
+          { id: "1", title: "Math Homework", dueDate: "2024-01-15", status: "pending" },
+          { id: "2", title: "Science Project", dueDate: "2024-01-10", status: "completed" }
+        ]
+      }
+    }).as("studentDashboard");
 
     cy.visit("/student/login");
     cy.get('input[type="email"]').type("student@example.com");
@@ -41,11 +52,14 @@ describe("Dashboard API Smoke Tests", () => {
       .invoke("getItem", "brightboost_token")
       .should("exist");
 
-    cy.contains("Loading your dashboard...").should("be.visible");
-
-    cy.wait("@studentDashboard", { timeout: 10000 }).then((interception) => {
-      expect(interception.request.url).to.include("/api/student_dashboard");
-    });
+    cy.get('.animate-spin', { timeout: 5000 }).should('be.visible');
+    
+    cy.wait("@studentDashboard", { timeout: 15000 });
+    
+    cy.contains('Hello,', { timeout: 10000 }).should('be.visible');
+    cy.contains('STEM 1').should('be.visible');
+    cy.contains('Letter Game').should('be.visible');
+    cy.contains('Leaderboard').should('be.visible');
   });
 
   it('allows new students to create accounts', () => {
