@@ -1,4 +1,5 @@
 // src/services/api.ts
+import { useCallback, useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 // Get API URL from environment variables - use relative URLs in development for proxy
@@ -216,7 +217,7 @@ export const signupStudent = async (
 export const useApi = () => {
   const { token } = useAuth();
 
-  const authFetch = async (endpoint: string, options: RequestInit = {}, retries = 2) => {
+  const authFetch = useCallback(async (endpoint: string, options: RequestInit = {}, retries = 2) => {
     const headers = {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -252,9 +253,9 @@ export const useApi = () => {
       
       throw error;
     }
-  };
+  }, [token]);
 
-  return {
+  const apiMethods = useMemo(() => ({
     get: (endpoint: string) => authFetch(endpoint, {}, 2),
     post: (endpoint: string, data: Record<string, unknown>) =>
       authFetch(endpoint, {
@@ -270,5 +271,7 @@ export const useApi = () => {
       authFetch(endpoint, {
         method: "DELETE",
       }, 2),
-  };
+  }), [authFetch]);
+
+  return apiMethods;
 };
