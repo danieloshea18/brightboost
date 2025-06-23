@@ -1,9 +1,7 @@
-import StudentRoster from "@/components/student-roster"
+"use client"
 
-export default function Home() {
-  return (
-    <main className="container mx-auto py-10 px-4">
-      <StudentRoster />
-    </main>
-  )
+import StudentRoster from "../student-roster"
+
+export default function Page() {
+  return <StudentRoster />
 }
