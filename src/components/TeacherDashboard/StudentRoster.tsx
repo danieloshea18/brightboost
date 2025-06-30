@@ -17,51 +17,65 @@ const initialStudents = [
 ]
 
 type Student = { id: number; name: string; level: number; xp: number }
-type SortKey = keyof Pick<Student, "name" | "level" | "xp"> // keys for sorting
-type SortConfig = {
-  key: SortKey | null
-  direction: "asc" | "desc"
-}
+type SortKey = keyof Pick<Student, "name" | "level" | "xp">
+type SortConfig = { key: SortKey | null; direction: "asc" | "desc" }
 const sortableKeys: SortKey[] = ["name", "level", "xp"]
 
 export default function StudentRoster() {
-  const [students, setStudents] = useState(initialStudents)
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: "asc" })
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const studentsPerPage = 4
 
+  // Derived state for search and sorting
+  const filtered = searchQuery.trim()
+    ? initialStudents.filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.level.toString().includes(searchQuery) ||
+          s.xp.toString().includes(searchQuery)
+      )
+    : initialStudents
+
+  const sorted = sortConfig.key
+    ? [...filtered].sort((a, b) => {
+        const { key, direction } = sortConfig
+        if (!key) return 0
+        const aVal = a[key]
+        const bVal = b[key]
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          return direction === "asc"
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal)
+        }
+        return direction === "asc"
+          ? (aVal as number) - (bVal as number)
+          : (bVal as number) - (aVal as number)
+      })
+    : filtered
+
+  const totalPages = Math.ceil(sorted.length / studentsPerPage)
+  const indexOfLastStudent = currentPage * studentsPerPage
+  const currentStudents = sorted.slice(indexOfLastStudent - studentsPerPage, indexOfLastStudent)
+  const paginate = (page: number) => page >= 1 && page <= totalPages && setCurrentPage(page)
+
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     setCurrentPage(1)
-    setStudents(
-      query.trim()
-        ? initialStudents.filter(
-            (s) =>
-              s.name.toLowerCase().includes(query.toLowerCase()) ||
-              s.level.toString().includes(query) ||
-              s.xp.toString().includes(query),
-          )
-        : initialStudents,
-    )
+  }
+  const clearSearch = () => {
+    setSearchQuery("")
+    setIsSearchOpen(false)
+    setCurrentPage(1)
   }
   const requestSort = (key: SortKey) => {
     const direction = sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc"
     setSortConfig({ key, direction })
-
-    setStudents(
-      [...students].sort((a, b) => (direction === "asc" ? (a[key] > b[key] ? 1 : -1) : a[key] < b[key] ? 1 : -1)),
-    )
-  }
-  const clearSearch = () => {
-    setSearchQuery("")
-    setStudents(initialStudents)
-    setIsSearchOpen(false)
   }
   const handleViewStudent = (id: number) => console.log(`View student with ID: ${id}`)
   const handleExportCSV = () => {
-    const csv = ["Name,Level,XP", ...students.map((s) => `${s.name},${s.level},${s.xp}`)].join("\n")
+    const csv = ["Name,Level,XP", ...sorted.map((s) => `${s.name},${s.level},${s.xp}`)].join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -72,18 +86,18 @@ export default function StudentRoster() {
     document.body.removeChild(link)
   }
 
-  const indexOfLastStudent = currentPage * studentsPerPage
-  const currentStudents = students.slice(indexOfLastStudent - studentsPerPage, indexOfLastStudent)
-  const totalPages = Math.ceil(students.length / studentsPerPage)
-  const paginate = (page: number) => page >= 1 && page <= totalPages && setCurrentPage(page)
-
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <CardTitle className="text-2xl">Student Roster</CardTitle>
         <div className="flex items-center gap-2">
           {!isSearchOpen ? (
-            <Button variant="outline" size="sm" onClick={() => setIsSearchOpen(true)} className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSearchOpen(true)}
+              className="gap-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            >
               <Search className="h-4 w-4" />
               <span className="sr-only sm:not-sr-only">Search</span>
             </Button>
@@ -103,13 +117,19 @@ export default function StudentRoster() {
                   size="icon"
                   onClick={clearSearch}
                   className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-500 hover:text-gray-700"
+                  aria-label="Clear search"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
           )}
-          <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 bg-transparent">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            className="gap-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+          >
             <Download className="h-4 w-4" />
             <span className="sr-only sm:not-sr-only">Export CSV</span>
           </Button>
@@ -119,8 +139,8 @@ export default function StudentRoster() {
       <CardContent>
         {searchQuery && (
           <div className="mb-4 text-sm text-muted-foreground">
-            Found {students.length} student{students.length !== 1 ? "s" : ""} matching "{searchQuery}"
-            <Button variant="ghost" size="sm" onClick={clearSearch} className="ml-2 h-auto p-0">
+            Found {sorted.length} student{sorted.length !== 1 ? "s" : ""} matching "{searchQuery}"
+            <Button variant="ghost" size="sm" onClick={clearSearch} className="ml-2 h-auto p-0 text-blue-600 hover:bg-transparent">
               Clear search
             </Button>
           </div>
@@ -158,7 +178,12 @@ export default function StudentRoster() {
                     <TableCell>{student.level}</TableCell>
                     <TableCell>{student.xp}</TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleViewStudent(student.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewStudent(student.id)}
+                        className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                      >
                         View
                       </Button>
                     </TableCell>
@@ -177,7 +202,13 @@ export default function StudentRoster() {
 
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            >
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Previous page</span>
             </Button>
@@ -189,13 +220,14 @@ export default function StudentRoster() {
               size="sm"
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className="border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
             >
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Next page</span>
             </Button>
           </div>
           <div className="text-sm text-muted-foreground">
-            Showing {currentStudents.length} of {students.length} student{students.length !== 1 ? "s" : ""}
+            Showing {currentStudents.length} of {sorted.length} student{sorted.length !== 1 ? "s" : ""}
           </div>
         </div>
       </CardContent>
