@@ -25,6 +25,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const LoginSelection = lazy(() => import("./pages/LoginSelection"));
 const SignupSelection = lazy(() => import("./pages/SignupSelection"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
+const TeacherStudentRoster = lazy(() => import("./pages/TeacherStudentRoster"));
 const QuestRouter = lazy(() => import("./pages/quests/QuestRouter"));
 
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -70,6 +71,14 @@ function App() {
               <TeacherLayout>
                 <TeacherClassDetail />
               </TeacherLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/roster"
+          element={
+            <ProtectedRoute requiredRole="TEACHER">
+              <TeacherStudentRoster />
             </ProtectedRoute>
           }
         />
