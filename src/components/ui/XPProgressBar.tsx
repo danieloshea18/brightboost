@@ -1,4 +1,4 @@
-import { motion, Variants} from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
 interface XPProgressBarProps {
@@ -187,8 +187,8 @@ const XPProgressBar: React.FC<XPProgressBarProps> = ({
                 Level Up!
               </span>
             </motion.div>
-         </div>
-       )}
+          </div>
+        )}
 
         {/* XP bar segments */}
         <div className="flex h-10 gap-1 border-2 border-brightboost-blue rounded-l-md bg-white px-1 py-0.5 relative z-10">
