@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Class, gradeOptions } from "../components/TeacherDashboard/types";
 import { fetchMockClassById, patchMockClass } from "../services/mockClassService";
 import ExportGradesButton from "../components/TeacherDashboard/ExportGradesButton";
-import { Users, GraduationCap, Calendar, Zap, Trophy, Target, Clock } from "lucide-react";
+import { Users, GraduationCap, Zap, Trophy, Target, Clock } from "lucide-react";
 import { getSTEM1Summary, STEM1_QUESTS } from "../services/stem1GradeService";
 
 const TeacherClassDetail: React.FC = () => {
@@ -35,17 +35,20 @@ const TeacherClassDetail: React.FC = () => {
     if (!classData) return;
 
     setIsSaving(true);
-    setClassData({
-      ...classData,
-      name: editingName,
-      grade: editingGrade as Class["grade"]});
-
-    await patchMockClass(classData.id, {
-      name: editingName,
-      grade: editingGrade as Class["grade"],
-    });
-
-    setIsSaving(false);
+    try {
+      await patchMockClass(classData.id, {
+        name: editingName,
+        grade: editingGrade as Class["grade"],
+      });
+      
+      setClassData({
+        ...classData,
+        name: editingName,
+        grade: editingGrade as Class["grade"],
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (error) {
@@ -60,7 +63,7 @@ const TeacherClassDetail: React.FC = () => {
       </div>
     );
   }
-
+  
   if (!classData) {
     return <p className="ml-64 p-6 text-gray-500">Loading class details...</p>;
   }
@@ -87,7 +90,6 @@ const TeacherClassDetail: React.FC = () => {
         />
       </div>
 
-      {/* STEM-1 Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
@@ -175,14 +177,14 @@ const TeacherClassDetail: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold mb-4 text-brightboost-navy flex items-center">
             <Zap className="w-5 h-5 mr-2" />
             STEM-1 Core Quests
           </h3>
           <div className="space-y-3">
-            {STEM1_QUESTS.map((quest, index) => (
+            {STEM1_QUESTS.map((quest) => (
               <div key={quest.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-gray-800">{quest.name}</span>
@@ -240,11 +242,10 @@ const TeacherClassDetail: React.FC = () => {
               </thead>
               <tbody>
                 {classData.students.map((student) => {
-                  // Mock progress data for display
                   const mockXP = Math.floor(Math.random() * 200) + 300;
                   const mockCompletion = Math.floor((mockXP / 500) * 100);
                   const mockPassed = mockCompletion >= 70;
-                  
+
                   return (
                     <tr key={student.id} className="border-b text-sm text-gray-800 hover:bg-gray-50">
                       <td className="py-3 px-4 font-mono text-xs">{student.id}</td>
