@@ -4,6 +4,8 @@ import LessonsTable from "./LessonTable";
 
 const MainContent: React.FC<MainContentProps> = ({
   lessonsData,
+  setLessonsData,
+  onAddLesson: _onAddLesson,
   onEditLesson,
   onDeleteLesson,
 }) => {
@@ -26,6 +28,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </p>
         <LessonsTable
           lessons={lessonsData}
+          setLessons={setLessonsData}
           onEditLesson={openEditForm}
           onDuplicateLesson={handleDuplicateLesson}
           onDeleteLesson={onDeleteLesson}
